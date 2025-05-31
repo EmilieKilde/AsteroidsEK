@@ -1,17 +1,20 @@
 package dk.sdu.cbse;
 
-import dk.sdu.cbse.common.data.*;
-import dk.sdu.cbse.common.service.*;
-import java.lang.module.ModuleReference;
-import java.lang.module.Configuration;
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleDescriptor;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.ServiceLoader.Provider;
+import dk.sdu.cbse.common.data.Entity;
+import dk.sdu.cbse.common.data.GameData;
+import dk.sdu.cbse.common.data.GameKeys;
+import dk.sdu.cbse.common.data.World;
+import dk.sdu.cbse.common.service.IEntityProcessingService;
+import dk.sdu.cbse.common.service.IGamePluginService;
+import dk.sdu.cbse.common.service.IPostEntityProcessingService;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -20,6 +23,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -31,6 +35,7 @@ public class Main extends Application {
     private final Map<Entity, Polygon> polygons = new ConcurrentHashMap<>();
     private final Pane gameWindow = new Pane();
 
+
     public static void main(String[] args) {
         launch(Main.class);
     }
@@ -38,10 +43,12 @@ public class Main extends Application {
     @Override
     public void start(Stage window) throws Exception {
         Text text = new Text(10, 20, "Destroyed asteroids: 0");
+        text.setFill(Color.WHITE);
         gameWindow.setPrefSize(gameData.getDisplayWidth(), gameData.getDisplayHeight());
         gameWindow.getChildren().add(text);
 
         Scene scene = new Scene(gameWindow);
+        scene.setFill(Color.rgb(0, 15, 38));
         scene.setOnKeyPressed(event -> {
             if (event.getCode().equals(KeyCode.LEFT)) {
                 gameData.getKeys().setKey(GameKeys.LEFT, true);
@@ -69,7 +76,6 @@ public class Main extends Application {
             if (event.getCode().equals(KeyCode.SPACE)) {
                 gameData.getKeys().setKey(GameKeys.SPACE, false);
             }
-
         });
 
         // Lookup all Game Plugins using ServiceLoader
@@ -81,10 +87,13 @@ public class Main extends Application {
             polygons.put(entity, polygon);
             gameWindow.getChildren().add(polygon);
         }
-        render();
+
+       // render();
+
         window.setScene(scene);
         window.setTitle("ASTEROIDS");
         window.show();
+
     }
 
     private void render() {
@@ -94,10 +103,12 @@ public class Main extends Application {
                 update();
                 draw();
                 gameData.getKeys().update();
+
             }
 
         }.start();
     }
+
 
     private void update() {
         for (IEntityProcessingService entityProcessorService : getEntityProcessingServices()) {
@@ -128,7 +139,6 @@ public class Main extends Application {
             polygon.setTranslateY(entity.getY());
             polygon.setRotate(entity.getRotation());
         }
-
     }
 
     private Collection<? extends IGamePluginService> getPluginServices() {
@@ -142,5 +152,4 @@ public class Main extends Application {
     private Collection<? extends IPostEntityProcessingService> getPostEntityProcessingServices() {
         return ServiceLoader.load(IPostEntityProcessingService.class).stream().map(ServiceLoader.Provider::get).collect(toList());
     }
-
 }

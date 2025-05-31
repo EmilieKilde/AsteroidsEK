@@ -8,13 +8,36 @@
         <artifactId>AsteroidsEK</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
+    <groupId>dk.sdu.cbse.enemy</groupId>
     <artifactId>Enemy</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
+    <name>Enemy</name>
+    <url>http://maven.apache.org</url>
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+<!--        <maven.compiler.source>21</maven.compiler.source>-->
+<!--        <maven.compiler.target>21</maven.compiler.target>-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>dk.sdu.cbse</groupId>
+            <artifactId>Common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+
+        </dependency>
+        <dependency>
+            <groupId>dk.sdu.cbse</groupId>
+            <artifactId>Player</artifactId>
+            <version>1.0-SNAPSHOT</version>
+
+        </dependency>
+        <dependency>
+            <groupId>dk.sdu.cbse</groupId>
+            <artifactId>CommonBullet</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>

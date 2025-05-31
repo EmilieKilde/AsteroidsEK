@@ -8,17 +8,17 @@
         <artifactId>AsteroidsEK</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
+    <groupId>dk.sdu.cbse.commonasteroid</groupId>
     <artifactId>CommonAsteroid</artifactId>
-
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>CommonAsteroid</name>
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>dk.sdu.cbse</groupId>
+            <groupId>dk.sdu.cbse.common</groupId>
             <artifactId>Common</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>

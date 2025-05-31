@@ -8,42 +8,37 @@ import dk.sdu.cbse.commonasteroids.Asteroid;
 import dk.sdu.cbse.commonasteroids.IAsteroidSplitter;
 
 public class AsteroidsProcess implements IEntityProcessingService {
-    private IAsteroidSplitter asteroidSplit = new AsteroidSplit();
+    //private IAsteroidSplitter asteroidSplit = new AsteroidSplit();
+    AsteroidsPlugin newAsteroid;
+    int asteroidsCurrent; //asteroids som er til stede
+    int asteroidsDestroyed; //Asteroids ødelagt
+    int difficulty;
+
+    public AsteroidsProcess(){
+        this.newAsteroid = new AsteroidsPlugin();
+        this.asteroidsDestroyed = 0;
+        this.difficulty = 1;
+        this.asteroidsCurrent = 0;
+
+    }
     @Override
     public void process(GameData gameData, World world) {
         for (Entity asteroid : world.getEntities(Asteroid.class)) {
-            // opdater rotation
-            asteroid.setRotation(asteroid.getRotation() /*+ asteroid.getRotationSpeed()*/);
 
-            // opdater pos
             double changeX = Math.cos(Math.toRadians(asteroid.getRotation()));
             double changeY = Math.sin(Math.toRadians(asteroid.getRotation()));
 
-            asteroid.setX(asteroid.getX() + changeX);
-            asteroid.setY(asteroid.getY() + changeY);
+            // opdater pos
+            asteroid.setX(asteroid.getX() + changeX * 1);
+            asteroid.setY(asteroid.getY() + changeY * 1);
 
-            wrapAroundScreen(gameData, asteroid);
+
+            float screenHeight = gameData.getDisplayHeight();
+            float screenWidth = gameData.getDisplayWidth();
+            //Jeg prøver at fjerne asteroider der går uden for skærmen
+            if((asteroid.getX()<0) || (asteroid.getX()> screenWidth)||(asteroid.getY() < 0) || (asteroid.getY() > screenHeight)){
+                world.removeEntity(asteroid);
+            }
         }
-    }
-    private void wrapAroundScreen(GameData gameData, Entity asteroid) {
-
-        if (asteroid.getX() < 0) {
-            asteroid.setX(gameData.getDisplayWidth());
-        } else if (asteroid.getX() > gameData.getDisplayWidth()) {
-            asteroid.setX(0);
-        }
-
-
-        if (asteroid.getY() < 0) {
-            asteroid.setY(gameData.getDisplayHeight());
-        } else if (asteroid.getY() > gameData.getDisplayHeight()) {
-            asteroid.setY(0);
-        }
-    }
-    public void setAsteroidSplit(IAsteroidSplitter asteroidSplit){
-        this.asteroidSplit = asteroidSplit;
-    }
-    public void removeAsteroidSplit(IAsteroidSplitter asteroidSplit){
-        this.asteroidSplit = null;
     }
 }

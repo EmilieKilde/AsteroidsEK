@@ -9,17 +9,29 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <groupId>dk.sdu.cbse.collision</groupId>
     <artifactId>Collision</artifactId>
+    <packaging>jar</packaging>
 
-    <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+<!--    <properties>-->
+<!--        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
+<!--    </properties>-->
     <dependencies>
         <dependency>
-            <groupId>dk.sdu.cbse</groupId>
+            <groupId>dk.sdu.cbse.common</groupId>
             <artifactId>Common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>dk.sdu.cbse.enemy</groupId>
+            <artifactId>Enemy</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>dk.sdu.cbse.commonbullet</groupId>
+            <artifactId>CommonBullet</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

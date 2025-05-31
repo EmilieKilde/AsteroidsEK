@@ -27,5 +27,4 @@ public class GameData {
         return displayHeight;
     }
 
-
 }
