@@ -5,36 +5,50 @@ import dk.sdu.cbse.common.data.*;
 import dk.sdu.cbse.common.service.IEntityProcessingService;
 
 public class BulletsControl implements IEntityProcessingService, BulletSPI {
+    private static final double BULLET_SPEED = 3.0;
+    private static final double SPAWN_DISTANCE = 10.0;
+
     @Override
     public void process(GameData gameData, World world) {
-
         for (Entity bullet : world.getEntities(Bullet.class)) {
-            double changeX = Math.cos(Math.toRadians(bullet.getRotation()));
-            double changeY = Math.sin(Math.toRadians(bullet.getRotation()));
-            bullet.setX(bullet.getX() + changeX * 6);
-            bullet.setY(bullet.getY() + changeY * 6);
+            moveBullet(bullet);
 
-//          //fjerner bullets udenfor skærmen
-            float screenWidth = gameData.getDisplayWidth();
-            float screenHeight = gameData.getDisplayHeight();
-            if((bullet.getX()<0)|| (bullet.getX()>screenWidth)|| (bullet.getY() < 0) || (bullet.getY() > screenHeight)){
+            if (isOutOfBounds(bullet, gameData)) {
                 world.removeEntity(bullet);
             }
         }
     }
-        @Override
-        public Entity createBullet(Entity shooter, GameData gameData){
-            Entity bullet = new Bullet();
-            bullet.setPolygonCoordinates(1, -1, 1, 1, -1, 1, -1, -1);
-            double changeX = Math.cos(Math.toRadians(shooter.getRotation()));
-            double changeY = Math.sin(Math.toRadians(shooter.getRotation()));
-            bullet.setX(shooter.getX() + changeX * 10);
-            bullet.setY(shooter.getY() + changeY * 10);
-            bullet.setRotation(shooter.getRotation());
-            bullet.setRadius(1);
-            bullet.setType("Bullet");
-            bullet.setHealth(1);
-            return bullet;
-        }
+
+    private void moveBullet(Entity bullet) {
+        double radians = Math.toRadians(bullet.getRotation());
+        double changeX = Math.cos(radians) * BULLET_SPEED;
+        double changeY = Math.sin(radians) * BULLET_SPEED;
+
+        bullet.setX(bullet.getX() + changeX);
+        bullet.setY(bullet.getY() + changeY);
+    }
+
+    private boolean isOutOfBounds(Entity bullet, GameData gameData) {
+        double x = bullet.getX();
+        double y = bullet.getY();
+        return x < 0 || x > gameData.getDisplayWidth() ||
+                y < 0 || y > gameData.getDisplayHeight();
+    }
+
+    @Override
+    public Entity createBullet(Entity shooter, GameData gameData) {
+        Entity bullet = new Bullet();
+
+        // Position bullet slightly in front of shooter
+        double radians = Math.toRadians(shooter.getRotation());
+        double spawnX = shooter.getX() + Math.cos(radians) * SPAWN_DISTANCE;
+        double spawnY = shooter.getY() + Math.sin(radians) * SPAWN_DISTANCE;
+
+        bullet.setX(spawnX);
+        bullet.setY(spawnY);
+        bullet.setRotation(shooter.getRotation());
+
+        return bullet;
+    }
     }
 

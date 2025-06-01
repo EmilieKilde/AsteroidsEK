@@ -1,56 +1,35 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><project>
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>dk.sdu.cbse</groupId>
     <artifactId>AsteroidsEK</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-
     <name>AsteroidsEK</name>
-    <repositories></repositories>
-
-    <modules>
-        <module>Core</module>
-        <module>Common</module>
-        <module>Player</module>
-        <module>Bullet</module>
-        <module>CommonBullet</module>
-        <module>CommonAsteroid</module>
-        <module>Collision</module>
-        <module>Asteroid</module>
-        <module>Enemy</module>
-
-    </modules>
-
     <properties>
-        <java>java</java>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.9</maven.compiler.target>
     </properties>
     <dependencyManagement>
         <dependencies>
-<!--            <dependency>-->
-<!--                <groupId>org.openjfx</groupId>-->
-<!--                <artifactId>javafx-controls</artifactId>-->
-<!--                <version>21.0.2</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.openjfx</groupId>-->
-<!--                <artifactId>javafx-graphics</artifactId>-->
-<!--                <version>21.0.2</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>org.openjfx</groupId>-->
-<!--                <artifactId>javafx-base</artifactId>-->
-<!--                <version>21.0.2</version>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-controls</artifactId>
+                <version>21.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-graphics</artifactId>
+                <version>21.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-base</artifactId>
+                <version>21.0.2</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
@@ -78,12 +57,14 @@
                 <configuration>
                     <executable>java</executable>
                     <workingDirectory>.</workingDirectory>
+                    <longModulepath>false</longModulepath>
                     <arguments>
                         <argument>--module-path=mods-mvn</argument>
                         <argument>--class-path=libs/*</argument>
-                        <argument>--module=Core/dk.sdu.cbse.Main</argument>
+                        <argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=127.0.0.1:8000
+                        </argument>
+                        <argument>--module=Core/dk.sdu.cbse.core.Main</argument>
                         <argument>--add-modules javafx.graphics</argument>
-                        <argument>--add-modules javafx.controls</argument>
                     </arguments>
                 </configuration>
             </plugin>
@@ -153,4 +134,17 @@
             </build>
         </profile>
     </profiles>
+    <modules>
+        <module>Asteroid</module>
+        <module>Bullet</module>
+        <module>Collision</module>
+        <module>Common</module>
+        <module>CommonAsteroid</module>
+        <module>CommonBullet</module>
+        <module>Core</module>
+        <module>Enemy</module>
+        <module>Player</module>
+        <module>Score</module>
+        <module>CommonEnemy</module>
+    </modules>
 </project>

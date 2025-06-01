@@ -2,43 +2,53 @@ package dk.sdu.cbse.asteroid;
 
 import dk.sdu.cbse.common.data.Entity;
 import dk.sdu.cbse.common.data.World;
-import dk.sdu.cbse.commonasteroids.Asteroid;
 import dk.sdu.cbse.commonasteroids.IAsteroidSplitter;
 
 import java.util.Random;
 
 public class AsteroidSplit implements IAsteroidSplitter {
-    private final AsteroidSplit asteroidSplit;
-    public AsteroidSplit(){
-        this.asteroidSplit = new AsteroidSplit();
-    }
-//    @Override
-//    public void removeBeforeSplit(Entity entity, World world){
-//        asteroidSplit.createSplitAsteroid(entity, world);
-//    }
+    private static final int MIN_SPLIT_SIZE = 5;
+    private static final int MAX_SPLIT_COUNT = 4;
+    private static final int POSITION_OFFSET = 5;
+    private static final Random random = new Random();
+
     @Override
-    public void createSplitAsteroid(Entity asteroids, World world){
-        Random random = new Random();
-        double x = asteroids.getX();
-        double y = asteroids.getY();
-
-        //splitter asteroider afhængig af størrelse.
-        if(asteroids.getRadius()>5){
-            int asteroidsAmount = random.nextInt(3)+1;
-            int size = (int)asteroids.getRadius()/asteroidsAmount;
-            if(size<1) size = 1; //hvis linjen over giver mindre end 1, så sættes den til 1
-
-            for(int i = 0; i<asteroidsAmount; i++){
-                Entity asteroid = new Asteroid();
-                asteroid.setPolygonCoordinates(size, -size, -size, -size, -size, size, size, size);
-                asteroid.setRadius(size);
-                asteroid.setRotation(random.nextInt(90) + (i * ((double)360 / asteroidsAmount)));
-                asteroid.setHealth(1);
-                asteroid.setX(x+ random.nextInt(5));
-                asteroid.setY(y+random.nextInt(5));
-
-                world.addEntity(asteroid);
-            }
+    public void createSplitAsteroid(Entity asteroidA, World world) {
+        if (asteroidA.getRadius() <= MIN_SPLIT_SIZE) {
+            return; // Too small to split
         }
+
+        double originalX = asteroidA.getX();
+        double originalY = asteroidA.getY();
+
+        // Create 1-4 smaller asteroids
+        int numSplits = random.nextInt(MAX_SPLIT_COUNT) + 1;
+        int newSize = Math.max(1, (int) asteroidA.getRadius() / numSplits);
+
+        int baseDirection = random.nextInt(360);
+        int angleIncrement = 360 / numSplits;
+
+        for (int i = 0; i < numSplits; i++) {
+            Entity splitAsteroid = new Asteroid();
+
+            // Set size and shape
+            splitAsteroid.setPolygonCoordinates(newSize, -newSize, -newSize, -newSize,
+                    -newSize, newSize, newSize, newSize);
+            splitAsteroid.setRadius(newSize);
+
+            // Set direction
+            int direction = baseDirection + (i * angleIncrement);
+            splitAsteroid.setRotation(direction);
+
+            // Slightly offset position
+            double offsetX = random.nextInt(POSITION_OFFSET);
+            double offsetY = random.nextInt(POSITION_OFFSET);
+            splitAsteroid.setX(originalX + offsetX);
+            splitAsteroid.setY(originalY + offsetY);
+
+            world.addEntity(splitAsteroid);
+        }
+
+        System.out.println("Splitting asteroid into " + numSplits + " smaller pieces");
     }
 }

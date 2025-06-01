@@ -8,32 +8,31 @@ import dk.sdu.cbse.common.service.IGamePluginService;
 import java.util.Random;
 
 public class EnemyPlugin implements IGamePluginService {
-    private Random random = new Random();
+    private static final Random random = new Random();
 
     @Override
     public void start(GameData gameData, World world) {
-        Entity enemy = createEnemyShip(gameData);
+        Entity enemy = createEnemy(gameData);
         world.addEntity(enemy);
+        System.out.println("Spawning Enemy ship " + enemy.getID());
     }
 
     @Override
     public void stop(GameData gameData, World world) {
-        // Remove entities
-        for (Entity enemy : world.getEntities(Enemy.class)) {
-            world.removeEntity(enemy);
-        }
+        world.getEntities(Enemy.class)
+                .forEach(world::removeEntity);
     }
 
-    private Entity createEnemyShip(GameData gameData) {
-        Entity enemyShip = new Enemy();
-        Random rnd = new Random();
-        int size = rnd.nextInt(6) + 4;
-        enemyShip.setPolygonCoordinates(-size, -size, size, size, -size, size);
-        enemyShip.setX(random.nextInt(gameData.getDisplayWidth()));
-        enemyShip.setY(random.nextInt(gameData.getDisplayHeight()));
-        enemyShip.setRadius(15);
-        enemyShip.setRotation(rnd.nextInt(90));
+    private Entity createEnemy(GameData gameData) {
+        System.out.println("Creating Enemy Ship");
+        Entity enemy = new Enemy();
 
-        return enemyShip;
+        enemy.setRotation(random.nextInt(360));
+
+        // Random spawn location
+        enemy.setX(random.nextInt(gameData.getDisplayWidth()));
+        enemy.setY(random.nextInt(gameData.getDisplayHeight()));
+
+        return enemy;
     }
 }

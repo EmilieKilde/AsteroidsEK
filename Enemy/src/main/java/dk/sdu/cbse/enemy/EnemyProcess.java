@@ -4,60 +4,100 @@ import dk.sdu.cbse.common.data.Entity;
 import dk.sdu.cbse.common.data.GameData;
 import dk.sdu.cbse.common.data.World;
 import dk.sdu.cbse.common.service.IEntityProcessingService;
+import dk.sdu.cbse.commonbullet.BulletSPI;
 import dk.sdu.cbse.player.Player;
 import dk.sdu.cbse.commonbullet.Bullet;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Random;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 public class EnemyProcess implements IEntityProcessingService {
-    private Random random = new Random();
+    private static final double MOVEMENT_SPEED = 0.7;
+    private static final int ROTATION_CHANGE = 2;
+    private static final int SHOOT_CHANCE = 5; // 5% chance per frame
+    private static final Random random = new Random();
+
+    private final EnemyPlugin enemyFactory;
+
+    public EnemyProcess() {
+        this.enemyFactory = new EnemyPlugin();
+    }
+
     @Override
-    public void process(GameData gameData, World world){
-        for(Entity enemy : world.getEntities(Enemy.class)){
-            Entity player = world.getEntities(Player.class).stream().findFirst().orElse(null);
-            if (player != null) {
-                double dx = player.getX() - enemy.getX();
-                double dy = player.getY() - enemy.getY();
-                double angle = Math.atan2(dy, dx);
-                enemy.setRotation(Math.toDegrees(angle));
-                double changeX = Math.cos(angle);
-                double changeY = Math.sin(angle);
-                enemy.setX(enemy.getX() + changeX * 0.5);
-                enemy.setY(enemy.getY() + changeY * 0.5);
-            }
-            if (enemy.getX() < 0) {
-                enemy.setX(enemy.getX() - gameData.getDisplayWidth());
-            }
+    public void process(GameData gameData, World world) {
+        Collection<Entity> enemies = world.getEntities(Enemy.class);
 
-            if (enemy.getX() > gameData.getDisplayWidth()) {
-                enemy.setX(enemy.getX() % gameData.getDisplayWidth());
-            }
+        for (Entity enemy : enemies) {
+            updateEnemyBehavior(enemy, gameData, world);
 
-            if (enemy.getY() < 0) {
-                enemy.setY(enemy.getY() - gameData.getDisplayHeight());
-            }
-
-            if (enemy.getY() > gameData.getDisplayHeight()) {
-                enemy.setY(enemy.getY() % gameData.getDisplayHeight());
-            }
-            if(random.nextInt(100)<1){
-                shoot(enemy, gameData, world);
+            if (isOutOfBounds(enemy, gameData)) {
+                world.removeEntity(enemy);
+                safeIncreaseAsteroidsKilled(gameData);
             }
         }
+
+        // Ensure at least one enemy exists
+        if (enemies.isEmpty()) {
+            respawnEnemy(gameData, world);
+        }
     }
-    private void shoot(Entity enemy, GameData gameData, World world) {
-        Entity bullet = new Bullet();
-        bullet.setPolygonCoordinates(2, -2, 2, 2, -2, 2, -2, -2);
-        bullet.setX(enemy.getX());
-        bullet.setY(enemy.getY());
-        bullet.setRotation(enemy.getRotation());
-        bullet.setRadius(1);
 
-        double changeX = Math.cos(Math.toRadians(bullet.getRotation()));
-        double changeY = Math.sin(Math.toRadians(bullet.getRotation()));
-        bullet.setX(bullet.getX() + changeX * 40);
-        bullet.setY(bullet.getY() + changeY * 40);
+    private void updateEnemyBehavior(Entity enemy, GameData gameData, World world) {
+        // Random rotation change
+        double newRotation = enemy.getRotation() + random.nextInt(ROTATION_CHANGE);
+        enemy.setRotation(newRotation);
 
-        world.addEntity(bullet);
+        // Move forward
+        double radians = Math.toRadians(enemy.getRotation());
+        double changeX = Math.cos(radians) * MOVEMENT_SPEED;
+        double changeY = Math.sin(radians) * MOVEMENT_SPEED;
+
+        enemy.setX(enemy.getX() + changeX);
+        enemy.setY(enemy.getY() + changeY);
+
+        // Occasionally shoot
+        if (random.nextInt(100) < SHOOT_CHANCE) {
+            fireBullet(enemy, gameData, world);
+        }
+    }
+
+    private boolean isOutOfBounds(Entity enemy, GameData gameData) {
+        double x = enemy.getX();
+        double y = enemy.getY();
+        return x < 0 || x > gameData.getDisplayWidth() ||
+                y < 0 || y > gameData.getDisplayHeight();
+    }
+
+    private void fireBullet(Entity enemy, GameData gameData, World world) {
+        getBulletSPIs().stream()
+                .findFirst()
+                .ifPresent(spi -> world.addEntity(spi.createBullet(enemy, gameData)));
+    }
+
+    private void respawnEnemy(GameData gameData, World world) {
+        try {
+            gameData.increaseEnemiesKilled();
+        } catch (IOException e) {
+            System.err.println("Failed to update enemies killed: " + e.getMessage());
+        }
+        enemyFactory.start(gameData, world);
+    }
+
+    private void safeIncreaseAsteroidsKilled(GameData gameData) {
+        try {
+            gameData.increaseAsteroidsKilled();
+        } catch (IOException e) {
+            System.err.println("Failed to update asteroids killed: " + e.getMessage());
+        }
+    }
+
+    private Collection<? extends BulletSPI> getBulletSPIs() {
+        return ServiceLoader.load(BulletSPI.class)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .collect(Collectors.toList());
     }
 }

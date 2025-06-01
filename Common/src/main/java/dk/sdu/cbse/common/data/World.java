@@ -1,44 +1,57 @@
 package dk.sdu.cbse.common.data;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-public class World {
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+public class World {
     private final Map<String, Entity> entityMap = new ConcurrentHashMap<>();
 
     public String addEntity(Entity entity) {
-        entityMap.put(entity.getID(), entity);
-        return entity.getID();
+        if (entity != null) {
+            entityMap.put(entity.getID(), entity);
+            return entity.getID();
+        }
+        return null;
     }
 
     public void removeEntity(String entityID) {
-        entityMap.remove(entityID);
+        if (entityID != null) {
+            entityMap.remove(entityID);
+        }
     }
 
     public void removeEntity(Entity entity) {
-        entityMap.remove(entity.getID());
+        if (entity != null) {
+            entityMap.remove(entity.getID());
+        }
     }
 
     public Collection<Entity> getEntities() {
-        return entityMap.values();
+        return new ArrayList<>(entityMap.values());
     }
 
-    public <E extends Entity> List<Entity> getEntities(Class<E>... entityTypes) {
-        List<Entity> r = new ArrayList<>();
-        for (Entity e : getEntities()) {
-            for (Class<E> entityType : entityTypes) {
-                if (entityType.equals(e.getClass())) {
-                    r.add(e);
-                }
-            }
+    @SafeVarargs
+    public final <E extends Entity> List<Entity> getEntities(Class<E>... entityTypes) {
+        if (entityTypes == null || entityTypes.length == 0) {
+            return new ArrayList<>();
         }
-        return r;
+
+        Set<Class<E>> typeSet = new HashSet<>(Arrays.asList(entityTypes));
+        return getEntities().stream()
+                .filter(entity -> typeSet.contains(entity.getClass()))
+                .collect(Collectors.toList());
     }
 
     public Entity getEntity(String ID) {
         return entityMap.get(ID);
     }
 
+    public int getEntityCount() {
+        return entityMap.size();
+    }
+
+    public void clear() {
+        entityMap.clear();
+    }
 }

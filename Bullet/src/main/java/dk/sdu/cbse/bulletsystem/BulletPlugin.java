@@ -7,18 +7,14 @@ import dk.sdu.cbse.common.service.IGamePluginService;
 import dk.sdu.cbse.commonbullet.Bullet;
 
 public class BulletPlugin implements IGamePluginService {
-    private Entity bullet;
-
     @Override
     public void start(GameData gameData, World world) {
-
+        // Bullets are created dynamically when entities shoot
     }
+
     @Override
     public void stop(GameData gameData, World world) {
-        for (Entity e : world.getEntities()) {
-            if (e.getClass() == Bullet.class) {
-                world.removeEntity(e);
-            }
-        }
+        world.getEntities(Bullet.class)
+                .forEach(world::removeEntity);
     }
 }
